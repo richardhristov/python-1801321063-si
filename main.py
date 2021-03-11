@@ -22,18 +22,15 @@ def parse_file(filename):
         return (rows, cols, data)
 
 
-def dfs(data, y_orig, x_orig, cols, rows, visited, pruned):
-    if pruned[y_orig][x_orig]:
-        return 0
-    # Set the cell as visited from the original cell
-    visited[y_orig][x_orig] = (y_orig, x_orig)
+def dfs(data, y_orig, x_orig, cols, rows, visited):
     stack = [(y_orig, x_orig)]
+    total = 0
     while len(stack):
-        (y, x) = stack.pop()
-        if pruned[y][x]:
+        (y, x) = stack.pop(0)
+        if visited[y][x]:
             continue
-        visited[y][x] = (y_orig, x_orig)
-        pruned[y][x] = True
+        total += 1
+        visited[y][x] = True
         # Top
         if y > 0 and not visited[y-1][x] and data[y-1][x] == data[y][x]:
             stack.append((y-1, x))
@@ -46,24 +43,19 @@ def dfs(data, y_orig, x_orig, cols, rows, visited, pruned):
         # Bottom
         if y < rows -1 and not visited[y+1][x] and data[y+1][x] == data[y][x]:
             stack.append((y+1, x))
-    # Count visited cells
-    visited_count = 0
-    for y in range(0, rows):
-        for x in range(0, cols):
-            if visited[y][x] == (y_orig, x_orig):
-                visited_count += 1
-    return visited_count
+    return total
 
 
 def solve(file_data):
     (rows, cols, data) = file_data
     longest_sequence = 0
-    pruned = [[0 for x in range(cols)] for y in range(rows)]
-    visited = [[0 for x in range(cols)] for y in range(rows)]
+    visited = [[False for x in range(cols)] for y in range(rows)]
     for y in range(0, rows):
         for x in range(0, cols):
+            if visited[y][x]:
+                continue
             # Start a DFS from each cell and keep track of the longest sequence
-            longest_sequence = max(longest_sequence, dfs(data, y, x, cols, rows, visited, pruned))
+            longest_sequence = max(longest_sequence, dfs(data, y, x, cols, rows, visited))
     return longest_sequence
 
 files = sys.argv[1:]
